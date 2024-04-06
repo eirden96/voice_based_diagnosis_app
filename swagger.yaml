@@ -1,0 +1,52 @@
+openapi: "3.0.0"
+info:
+  title: "Voice Based Diagnosis API"
+  version: "1.0.0"
+paths:
+  /send_data:
+    get:
+      tags:
+        - Get recording data for a user
+      description: Get recording data for a user
+      parameters:
+        - in: path
+          name: username
+          description: The username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  result:
+                    type: string
+    post:
+      tags:
+        - Send Data voice files
+      description: Send users voice data
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                name:
+                  type: string
+                timestamp: 
+                  type: string
+      responses:
+        '201':
+          description: data send successfully
+        '400':
+          description: Bad request
