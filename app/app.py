@@ -51,7 +51,7 @@ class SignUp(Resource):
 
 
 class SignIn(Resource): 
-    @api.doc(swagger_spec['paths']['/signup']['post'])
+    @api.doc(swagger_spec['paths']['/signin']['post'])
     def post(self): 
         response_body = {}
         # We know the API structure 
@@ -144,32 +144,7 @@ class VoiceData(Resource):
 
 api.add_resource(VoiceData, '/voice_data')
 api.add_resource(SignUp, '/signup')
+api.add_resource(SignIn, '/signin')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# @app.route('/upload', methods=['POST', 'GET'])
-# def upload_file():
-#     logger = create_logger()
-
-#     if 'file' not in request.files:
-#         logger.info("No file received")
-#         return "No file received"
-#     request_data = request.form.to_dict()
-#     received_file = request.files['file']
-#     if received_file.filename == '':
-#         logger.info("No file received")
-#         return "No file received"
-
-#     logger.info(f"request data: {request_data}")
-    
-#     logger.info("Wav file received. Will process..")
-#     speech_result = transcribe_speech(logger, received_file)
-
-#     logger.info(f"logger is: {logger}")
-#     db_store = DBStore(logger)
-#     db_store.store_result_in_db(speech_result, request_data["user"], request_data["timestamp"])
-#     return "Received, processed and stored!"
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
