@@ -30,7 +30,7 @@ class DBStore:
         self.logger.info("Finished storing data in the DB")
 
     def get_result_for_user(self, username):
-        self.logger.info("Getting data from DB for user: {username}")
+        self.logger.info(f"Getting data from DB for user: {username}")
         self.start_connection()
 
         get_query = get_results_query.replace("to_be_replaced", username)
@@ -44,4 +44,27 @@ class DBStore:
 
         return data
 
+    def signup_user(username, full_name): 
+        self.logger.info(f"Signing up user {username}")
+        self.start_connection()
 
+        self.cursor.execute("INSERT INTO users (username, full_name) VALUES (?, ?)",
+                (username, full_name))
+        self.conn.commit()
+        self.close_connection()
+        self.logger.info("Finished storing data in the DB for user {username}")
+
+    def sign_in(username):
+        self.logger.info(f"Signing in user {username}")
+        self.start_connection()
+
+        get_user_query = f"SELECT * FROM users WHERE username = '{username}'"
+        rows = self.cursor.execute(get_query)
+
+        self.conn.commit()
+        self.close_connection()
+        self.logger.info(f"Finished signin user: {username}")
+
+        if rows: 
+            return True
+        return False

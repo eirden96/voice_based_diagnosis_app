@@ -3,6 +3,7 @@ from flask_restx  import Api, Resource
 import json
 import sqlite3
 import yaml
+import asyncio 
 
 from model import transcribe_speech
 from db_store import DBStore 
@@ -21,8 +22,64 @@ with open('swagger.yaml', 'r') as file:
 
 print(swagger_spec)
 
+class SignUp(Resource): 
+    @api.doc(swagger_spec['paths']['/signup']['post'])
+    def post(self): 
+        response_body = {}
+        # We know the API structure 
+        if "username" not in request.json or "full_name" not in request.json:
+            g.logger.error(f"Error signing up user. Invalid json: {request.json}")
+            response_body["Error"] = "Missing API parameters"
+            return make_response(jsonify(response_body), 400)
+
+        g.logger.info(f"Received signup request: {request.json}")
+        req = request.json
+
+        try:
+            db_store = DBStore(g.logger)
+            db_responnse = db_store.signup_user(req["username"], req["full_name"])
+            response_body["Message"] = f"User {req['username']} signed up successfully."
+            return make_response(jsonify(response_body), 201)
+        except sqlite3.IntegrityError as e:
+            g.logger.info(f"User with username {req['username']} already exists")
+            response_body["Error"] = "Error signing up user"
+            return make_response(jsonify(response_body), 409)
+        except Exception as e: 
+            g.logger.info(f"Error occured when signing up user {req['username']}. The error is {str(e)}")
+            response_body["Error"] = "Error signing up user"
+            return make_response(jsonify(response_body), 400)
+
+
+class SignIn(Resource): 
+    @api.doc(swagger_spec['paths']['/signup']['post'])
+    def post(self): 
+        response_body = {}
+        # We know the API structure 
+        if "username" not in request.json:
+            g.logger.error(f"Error signing in user. Invalid json: {request.json}")
+            response_body["Error"] = "Missing API parameters"
+            return make_response(jsonify(response_body), 400)
+
+        g.logger.info(f"Received signup request: {request.json}")
+        req = request.json
+
+        try:
+            db_store = DBStore(g.logger)
+            user_exists = db_store.sign_in(req["username"])
+            status_code = 201
+            if user_exists: 
+                response_body["Message"] = f"User {req['username']} signed in successfully."
+            else: 
+                response_body["Message"] = f"User {req['username']} does not exist."
+                status_code = 404
+            return make_response(jsonify(response_body), status_code)
+        except Exception as e: 
+            g.logger.info(f"Error occured when signing up user {req['username']}. The error is {str(e)}")
+            response_body["Error"] = "Error signing up user"
+            return make_response(jsonify(response_body), 400)
+
 class VoiceData(Resource):
-    @api.doc(swagger_spec['paths']['/send_data']['get'])
+    @api.doc(swagger_spec['paths']['/voice_data']['get'])
     def get(self):
         response_body = {}
 
@@ -42,7 +99,7 @@ class VoiceData(Resource):
             response_body["Error"] = "Error getting data"
             return make_response(jsonify(response_body), 400)
 
-    @api.doc(swagger_spec['paths']['/send_data']['post'])
+    @api.doc(swagger_spec['paths']['/voice_data']['post'])
     def post(self):
         response_body = {}
 
@@ -66,20 +123,27 @@ class VoiceData(Resource):
             return make_response(jsonify(response_body), 400)
         
         g.logger.info("Wav file received. Will process..")
-        speech_result = transcribe_speech(g.logger, received_file)
-        try: 
-            db_store = DBStore(g.logger)
-            db_store.store_result_in_db(speech_result, request_data["user"], request_data["timestamp"])
+        try:
+            # Response message for client
+            response_body["Message"] = "Data received and staring processing"
 
-            response_body["Message"] = "Received, processed and stored!"
+            # Start another subprocess to handle prediction
+            asyncio.create_task(self.process_additional_data())
+
             return make_response(jsonify(response_body), 200)
         except Exception as e:
             g.logger.error(f"Error occured when storing data in DB. The error is: {str(e)}")
             response_body["Error"] = "Error occured when storing data in DB"
             return make_response(jsonify(response_body), 500)
+    
+    async def process_data(self, received_file):
+        speech_result = transcribe_speech(g.logger, received_file)
+        db_store = DBStore(g.logger)
+        db_store.store_result_in_db(speech_result, request_data["user"], request_data["timestamp"])
 
 
-api.add_resource(VoiceData, '/send_data')
+api.add_resource(VoiceData, '/voice_data')
+api.add_resource(SignUp, '/signup')
 
 if __name__ == '__main__':
     app.run(debug=True)

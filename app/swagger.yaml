@@ -3,7 +3,37 @@ info:
   title: "Voice Based Diagnosis API"
   version: "1.0.0"
 paths:
-  /send_data:
+  /signup: 
+    post: 
+      tags: 
+        - Sign up user
+      description: API endpoint to signup user to application 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                full_name:
+                  type: string
+  /signin: 
+    post: 
+      tags: 
+        - Sign up user
+      description: API endpoint to signup user to application 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+  /voice_data:
     get:
       tags:
         - Get recording data for a user
