@@ -3,45 +3,48 @@ from constants import *
 
 class DBStore:
     def __init__(self, logger):
-        self.db_store = "voice_results.db"
+        self.db_store = "mental_health_app.db"
         self.logger = logger
+        self.logger_prefix = "DBStore:"
 
     def start_connection(self):
-        self.logger.info(f"Starting connection to DB store: {self.db_store}")
+        self.logger.info(f"{self.logger_prefix} Starting connection to DB store: {self.db_store}")
         try: 
-            self.conn = sqlite3.connect('voice_results.db')
+            self.conn = sqlite3.connect(self.db_store)
             self.cursor = self.conn.cursor()
         except Exception as e: 
-            self.logger.error(f"Error occured when trying to connect to DB {self.db_store}. The error is {str(e)}")
+            self.logger.error(f"{self.logger_prefix} Error occured when trying to connect to DB {self.db_store}. The error is {str(e)}")
     
     def close_connection(self):
         if self.cursor:
             self.cursor.close()
         if self.conn:    
             self.conn.close()
-
-    def store_result_in_db(self, speech_result, username, timestamp):
-        self.logger.info("Storing data in the DB...")
-        self.start_connection()
-        self.cursor.execute("INSERT INTO results (username, timestamp, result) VALUES (?, ?, ?)",
-                (username, timestamp, speech_result))
-        self.conn.commit()
-        self.close_connection()
-        self.logger.info("Finished storing data in the DB")
-
-    def get_result_for_user(self, username):
-        self.logger.info("Getting data from DB for user: {username}")
-        self.start_connection()
-
-        get_query = get_results_query.replace("to_be_replaced", username)
-        self.logger.debug(f"SELECT query: {get_query}")
-        rows = self.cursor.execute(get_query)
-        data = [{'timestamp': row[1], 'result': row[2]} for row in rows]
-
-        self.conn.commit()
-        self.close_connection()
-        self.logger.info(f"Finished getting data for user: {username}")
-
-        return data
+    
+    def run_query(self, query): 
+        try:
+            self.start_connection()
+            self.logger.info(f"{self.logger_prefix} Running query: {query}")
+            self.cursor.execute(query)
+            rows = self.cursor.fetchall()  # Fetch all rows from the executed query
+            self.conn.commit()
+            return rows  # Return the fetched rows
+        except Exception as e:
+            self.logger.error(f"{self.logger_prefix} Error occurred while running query: {str(e)}")
+            raise  # Re-raise the exception for handling in the calling function
+        finally:
+            self.close_connection()
 
 
+# MAY MOVE to handlers will decide later
+    # def store_result_in_db(self, speech_result, recording_id, username=None, timestamp=None):
+    #     self.logger.info(f"{self.logger_prefix} Storing results in the DB for user {username}")
+    #     if username == None and timestamp == None:
+    #         store_query = f"UPDATE results set result = '{speech_result}' where recording_id = '{recording_id}'"
+    #     else: 
+    #         store_query = f"INSERT INTO results (username, timestamp, result, recording_id) VALUES ({username}, {timestamp}, {speech_result}, {recording_id})"
+
+    #     self.run_query(store_query)
+    #     self.logger.info(f"{self.logger_prefix} Finished storing results in the DB for user {username}")
+
+    
