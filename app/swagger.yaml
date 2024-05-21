@@ -80,3 +80,26 @@ paths:
           description: data send successfully
         '400':
           description: Bad request
+  /prediction_status: 
+    get:
+      tags:
+        - Get in progress recordings for user
+      description: Get =in progress recording for user
+      parameters:
+        - in: path
+          name: username
+          description: The username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  in_progress:
+                    type: string
+

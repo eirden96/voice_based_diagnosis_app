@@ -1,4 +1,4 @@
-insert_resutl_query = ""
+insert_result_query = ""
 
 get_results_query = """
 SELECT results.*
