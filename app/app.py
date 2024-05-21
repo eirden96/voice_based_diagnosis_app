@@ -66,58 +66,6 @@ class VoiceData(Resource):
         except Exception as e: 
             g.logger.info(f"Error processing users data: {str(e)}")
             return make_response(jsonify({"Message": "Error processing user data"}), 500)
-        # response_body = {}
-    #     response_body = {}
-
-    #     if 'file' not in request.files:
-    #         g.logger.info("No file received")
-    #         response_body["Error"] = "No file Received"
-    #         return make_response(jsonify(response_body), 400)
-
-    #     received_file = request.files['file']
-    #     g.logger.info(f"Received file with name: {received_file.filename}")
-    #     if received_file.filename == '':
-    #         logger.info("No file received")
-    #         response_body["Error"] = "No file Received"
-    #         return make_response(jsonify(response_body), 400)
-
-    #     request_data = request.form.to_dict()
-    #     g.logger.info(f"RTeceived data: {request_data}")
-    #     if "user" not in request_data or "timestamp" not in request_data:
-    #         logger.info("Missing API parameters")
-    #         response_body["Error"] = "Missing API parameters"
-    #         return make_response(jsonify(response_body), 400)
-        
-    #     g.logger.info("Wav file received. Will process..")
-    #     try:
-    #         # Response message for client
-    #         response_body["Message"] = "Data received and staring processing"
-
-    #         #save recording 'in progress in DB'
-    #         store_result_in_progress(request_data["user"])
-
-    #         # Start another subprocess to handle prediction
-    #         asyncio.create_task(self.process_additional_data())
-
-    #         return make_response(jsonify(response_body), 200)
-    #     except Exception as e:
-    #         g.logger.error(f"Error occured when storing data in DB. The error is: {str(e)}")
-    #         response_body["Error"] = "Error occured when storing data in DB"
-    #         return make_response(jsonify(response_body), 500)
-    
-    # async def process_data(self, received_file, recording_id):
-    #     speech_result = transcribe_speech(g.logger, received_file)
-    #     db_store = DBStore(g.logger)
-    #     db_store.store_result_in_db(speech_result, recording_id)
-
-    # def store_result_in_progress(self, username): 
-    #     recording_id = str(uuid.uuid())
-    #     timestamp = datetime.datetime.now().strftime("%d-%m-%Y")
-    #     db_store = DBStore(g.logger)
-
-    #     db_store.store_result_in_db(self, "In Progress", username, timestamp, recording_id)
-
-    #     return recording_id
 
 
 class PredictionStatus(Resource):
